@@ -13,7 +13,6 @@ const style = (width) => {
   return {
     cardStyle: {
       maxWidth: width > 500 ? width * 0.5 : width * 0.7,
-      backgroundColor: "red",
       padding: 3,
       borderRadius: 10,
     },
