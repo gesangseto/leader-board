@@ -8,6 +8,7 @@ import { Image } from "antd";
 import { dummyData } from "helper/dummy";
 import useWindowDimensions from "hook/dimension";
 import { useEffect, useState } from "react";
+import moment from "moment";
 
 const style = (width) => {
   return {
@@ -30,6 +31,7 @@ const style = (width) => {
 
 const styleRow = (item) => {
   let url = ``;
+  let rank = item.rank;
   if (item.rank === 1) {
     url = `url(${require("../../assets/image/rank-1.png")})`;
   } else if (item.rank === 2) {
@@ -38,8 +40,7 @@ const styleRow = (item) => {
     url = `url(${require("../../assets/image/rank-3.png")})`;
   }
   return {
-    container: {
-      border: 0,
+    badgeImg: {
       backgroundImage: url,
       backgroundSize: 25,
       backgroundRepeat: "no-repeat",
@@ -50,18 +51,42 @@ const styleRow = (item) => {
       fontSize: 12,
       textAlign: "center",
     },
+    rowStyle: {
+      backgroundColor:
+        rank === 1
+          ? "#7aa9f5"
+          : rank === 2
+          ? "#95bcfc"
+          : rank === 3
+          ? "#afcbfa"
+          : "",
+      borderBottom: 2,
+      borderColor: "white",
+    },
   };
 };
 export default function ListData() {
   const { height, width } = useWindowDimensions();
   const [listData, setListData] = useState([]);
   const [totalData, setTotalData] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState(null);
 
   useEffect(() => {
-    console.log(width);
-    // loadData();
-    setListData(dummyData(10));
+    setTimeout(async () => {
+      await updateData();
+    }, 5000);
+  }, [listData]);
+
+  useEffect(() => {
+    updateData();
   }, []);
+
+  const updateData = async () => {
+    let total = 10;
+    setListData(dummyData(total));
+    setTotalData(total);
+    setLastUpdate(moment().format("DD MMMM YYYY HH:mm:ss"));
+  };
 
   return (
     <div
@@ -98,14 +123,15 @@ export default function ListData() {
       <Typography
         sx={{ textAlign: "center", fontSize: 20, fontFamily: "roboto" }}
       >
-        DAYS 7 - LAST UPDATE : 19 JANUARI 2023 22:19:22
+        DAYS 7 - LAST UPDATE : {lastUpdate ? lastUpdate.toUpperCase() : ""}
       </Typography>
       <TableContainer
         size="small"
         component={Paper}
         sx={{ ...style(width).cardStyle, marginInline: "auto" }}
       >
-        <Table sx={{ ...style(width).cardStyle }}>
+        {/* HEADER TABLE */}
+        <Table sx={{ ...style(width).cardStyle, marginBottom: 1 }}>
           <TableHead>
             <TableRow style={{ backgroundColor: "#7aa9f5" }}>
               <TableCell
@@ -137,43 +163,29 @@ export default function ListData() {
               </TableCell>
             </TableRow>
           </TableHead>
+        </Table>
+        {/* ISINYA RANKING */}
+        <Table sx={{ ...style(width).cardStyle }}>
           <TableBody>
             {listData.map((row, idx) => (
               <TableRow
                 key={row.rank}
-                style={{
-                  backgroundColor:
-                    row.rank === 1
-                      ? "#7aa9f5"
-                      : row.rank === 2
-                      ? "#95bcfc"
-                      : row.rank === 3
-                      ? "#afcbfa"
-                      : "",
-                  borderWidth: 0,
+                sx={{
+                  ...styleRow(row).rowStyle,
                 }}
               >
-                <TableCell align="left" sx={{ ...styleRow(row).container }}>
+                <TableCell align="left" sx={{ ...styleRow(row).badgeImg }}>
                   <Typography sx={{ ...styleRow(row).text }}>
                     {row.rank}
                   </Typography>
                 </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...style(width).textContent, border: 0 }}
-                >
+                <TableCell align="left" sx={{ ...style(width).textContent }}>
                   {row.nama}
                 </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...style(width).textContent, border: 0 }}
-                >
+                <TableCell align="left" sx={{ ...style(width).textContent }}>
                   {row.total_jarak}
                 </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{ ...style(width).textContent, border: 0 }}
-                >
+                <TableCell align="left" sx={{ ...style(width).textContent }}>
                   {row.total_waktu}
                 </TableCell>
                 <TableCell
@@ -182,7 +194,6 @@ export default function ListData() {
                     ...style(width).textContent,
                     borderBottomRightRadius: idx == listData.lenght ? 25 : 0,
                     borderBottomLeftRadius: idx == listData.lenght ? 25 : 0,
-                    border: 0,
                   }}
                 >
                   {row.point}
